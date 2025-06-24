@@ -29,9 +29,7 @@ public class RequestColorizer implements HttpHandler {
         HighlightColor color = null;
         String method = requestToBeSent.method();
 
-        if (method.equalsIgnoreCase("POST")) {
-            color = HighlightColor.ORANGE;
-        } else if (method.equalsIgnoreCase("PUT") || method.equalsIgnoreCase("PATCH")) {
+        if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT") || method.equalsIgnoreCase("PATCH")) {
             color = HighlightColor.YELLOW;
         } else if (method.equalsIgnoreCase("DELETE")) {
             color = HighlightColor.RED;
@@ -77,8 +75,6 @@ public class RequestColorizer implements HttpHandler {
                 colorName = settings.getString(Extension.XML_COLOR_SETTING);
             } else if (mimeType == MimeType.HTML || contentType.contains("html")) {
                 colorName = settings.getString(Extension.HTML_COLOR_SETTING);
-            } else if (mimeType == MimeType.SCRIPT || contentType.contains("javascript")) {
-                colorName = settings.getString(Extension.JS_COLOR_SETTING);
             }
 
             if (colorName != null) {

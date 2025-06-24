@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 public class Extension implements BurpExtension {
         public static final String HTML_COLOR_SETTING = "HTML Color";
         public static final String JSON_COLOR_SETTING = "JSON Color";
-        public static final String JS_COLOR_SETTING = "JavaScript Color";
         public static final String XML_COLOR_SETTING = "XML Color";
         public static final String LOG_ENABLED_SETTING = "Enable logging";
 
@@ -33,8 +32,6 @@ public class Extension implements BurpExtension {
                                                                 HighlightColor.MAGENTA.name()),
                                                 SettingsPanelSetting.listSetting(JSON_COLOR_SETTING, colorNames,
                                                                 HighlightColor.GREEN.name()),
-                                                SettingsPanelSetting.listSetting(JS_COLOR_SETTING, colorNames,
-                                                                HighlightColor.YELLOW.name()),
                                                 SettingsPanelSetting.listSetting(XML_COLOR_SETTING, colorNames,
                                                                 HighlightColor.BLUE.name()),
                                                 SettingsPanelSetting.booleanSetting(LOG_ENABLED_SETTING, false))
