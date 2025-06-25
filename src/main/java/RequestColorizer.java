@@ -55,7 +55,7 @@ public class RequestColorizer implements HttpHandler {
                 colorName = settings.getString(Extension.XML_COLOR_SETTING);
             } else if (mimeType == MimeType.HTML || contentType.contains("html")) {
                 colorName = settings.getString(Extension.HTML_COLOR_SETTING);
-            } else if (contentType.startsWith("text/")) {
+            } else if (contentType.startsWith("text/plain")) {
                 colorName = settings.getString(Extension.TEXT_COLOR_SETTING);
             }
 
