@@ -1,5 +1,7 @@
 # Crayon
 
+![Build and Release](https://github.com/aleister1102/crayon/workflows/Build%20and%20Release/badge.svg)
+
 A Burp Suite extension that automatically colorizes request/response entries in the Proxy history and other tools, making it easier to spot interesting items at a glance.
 
 ## Features
@@ -24,8 +26,15 @@ Crayon uses a set of predefined and configurable rules to apply highlight colors
 
 You can customize the colors for different content types and enable/disable logging via the "Crayon Settings" panel in the Burp Suite **Settings** dialog.
 
-## Building the extension
+## Installation
 
+### Download from Releases
+1. Go to the [Releases](https://github.com/aleister1102/crayon/releases) page
+2. Download the latest `Crayon-X.X.X.jar` file
+3. In Burp Suite, go to **Extensions > Add**
+4. Select the downloaded JAR file
+
+### Build from Source
 Before you begin, make sure that your project's JDK is set to version "21" or higher.
 
 To build the JAR file, run the following command in the root directory of this project:
@@ -52,7 +61,61 @@ Your extension is now loaded. You can configure it under the main Burp **Setting
 
 If you make changes to the code, you must rebuild the JAR file and reload your extension in Burp for the changes to take effect.
 
-To rebuild the JAR file, follow the steps for [building the JAR file](#building-the-jar-file).
+To rebuild the JAR file, follow the steps for [building from source](#build-from-source).
+
+## Creating Releases
+
+This project automatically builds and releases based on your git actions:
+
+### Automatic Build on Push
+- **Push to master**: Automatically builds and uploads JAR artifacts (available for 90 days)
+- **Push tag**: Automatically builds and creates a GitHub release with JAR attached
+
+### To Create a New Release:
+
+1. **Update version in `build.gradle.kts`**:
+   ```kotlin
+   version = "1.0.1"  // Change this line
+   ```
+
+2. **Commit and push the version change**:
+   ```bash
+   git add build.gradle.kts
+   git commit -m "Bump version to 1.0.1"
+   git push origin master
+   ```
+
+3. **Create and push a version tag**:
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+
+4. **GitHub Actions will automatically**:
+   - Build the JAR file
+   - Create a GitHub release
+   - Attach the JAR file to the release
+
+### Workflow Triggers:
+- **Push to master**: Build + Upload artifacts
+- **Push version tag (v*)**: Build + Create release
+- **Pull requests**: Build and test only
+
+## CI/CD
+
+This project uses GitHub Actions with automated build and release:
+
+- **Build and Release Workflow** (`.github/workflows/release.yml`): 
+  - Builds and tests on every push and pull request
+  - Uploads JAR artifacts when pushing to master (90 days retention)
+  - Creates automatic releases when pushing version tags
+
+### Simple workflow:
+1. **Development**: Push code to master → Auto build + artifact upload
+2. **Release**: Push version tag → Auto build + GitHub release creation
+3. **Testing**: Create PR → Build and test only
+
+To rebuild the JAR file, follow the steps for [building from source](#build-from-source).
 
 To quickly reload your extension in Burp:
 
