@@ -12,37 +12,14 @@ import burp.api.montoya.ui.settings.SettingsPanelWithData;
 public class RequestColorizer implements HttpHandler {
     private final SettingsPanelWithData settings;
     private final Logging logging;
-    private final MontoyaApi api;
 
     public RequestColorizer(MontoyaApi api, SettingsPanelWithData settings) {
-        this.api = api;
         this.settings = settings;
         this.logging = api.logging();
     }
 
     @Override
     public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent requestToBeSent) {
-        if (requestToBeSent.annotations().highlightColor() != null) {
-            return RequestToBeSentAction.continueWith(requestToBeSent);
-        }
-
-        HighlightColor color = null;
-        String method = requestToBeSent.method();
-
-        if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT") || method.equalsIgnoreCase("PATCH")) {
-            color = HighlightColor.YELLOW;
-        } else if (method.equalsIgnoreCase("DELETE")) {
-            color = HighlightColor.RED;
-        }
-
-        if (color != null) {
-            requestToBeSent.annotations().setHighlightColor(color);
-            if (settings.getBoolean(Extension.LOG_ENABLED_SETTING)) {
-                logging.logToOutput("Crayon Request: " + requestToBeSent.method() + " " + requestToBeSent.url() + " -> "
-                        + color.name());
-            }
-        }
-
         return RequestToBeSentAction.continueWith(requestToBeSent);
     }
 
@@ -56,12 +33,15 @@ public class RequestColorizer implements HttpHandler {
         HighlightColor color = null;
 
         if (statusCode >= 500) {
-            color = HighlightColor.RED;
-        } else if (statusCode >= 400) {
-            color = HighlightColor.ORANGE;
-        } else if (statusCode >= 300) {
-            color = HighlightColor.YELLOW;
-        } else if (statusCode >= 200) {
+            String colorName = settings.getString(Extension.STATUS_5XX_COLOR_SETTING);
+            if (colorName != null) {
+                try {
+                    color = HighlightColor.valueOf(colorName);
+                } catch (IllegalArgumentException e) {
+                    logging.logToError("Invalid color name in settings: " + colorName);
+                }
+            }
+        } else {
             MimeType mimeType = responseReceived.inferredMimeType();
             String colorName = null;
             String contentType = responseReceived.headerValue("Content-Type");
@@ -75,6 +55,8 @@ public class RequestColorizer implements HttpHandler {
                 colorName = settings.getString(Extension.XML_COLOR_SETTING);
             } else if (mimeType == MimeType.HTML || contentType.contains("html")) {
                 colorName = settings.getString(Extension.HTML_COLOR_SETTING);
+            } else if (contentType.startsWith("text/plain")) {
+                colorName = settings.getString(Extension.TEXT_COLOR_SETTING);
             }
 
             if (colorName != null) {
@@ -82,6 +64,23 @@ public class RequestColorizer implements HttpHandler {
                     color = HighlightColor.valueOf(colorName);
                 } catch (IllegalArgumentException e) {
                     logging.logToError("Invalid color name in settings: " + colorName);
+                }
+            }
+
+            if (color == null) {
+                String statusCodeColorName = null;
+                if (statusCode >= 400) {
+                    statusCodeColorName = settings.getString(Extension.STATUS_4XX_COLOR_SETTING);
+                } else if (statusCode >= 300) {
+                    statusCodeColorName = settings.getString(Extension.STATUS_3XX_COLOR_SETTING);
+                }
+
+                if (statusCodeColorName != null) {
+                    try {
+                        color = HighlightColor.valueOf(statusCodeColorName);
+                    } catch (IllegalArgumentException e) {
+                        logging.logToError("Invalid color name in settings: " + statusCodeColorName);
+                    }
                 }
             }
         }
