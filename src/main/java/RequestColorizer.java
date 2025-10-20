@@ -32,6 +32,7 @@ public class RequestColorizer implements HttpHandler {
         short statusCode = responseReceived.statusCode();
         HighlightColor color = null;
 
+        // Prioritize status codes over content types
         if (statusCode >= 500) {
             String colorName = settings.getString(Extension.STATUS_5XX_COLOR_SETTING);
             if (colorName != null) {
@@ -41,7 +42,28 @@ public class RequestColorizer implements HttpHandler {
                     logging.logToError("Invalid color name in settings: " + colorName);
                 }
             }
-        } else {
+        } else if (statusCode >= 400) {
+            String colorName = settings.getString(Extension.STATUS_4XX_COLOR_SETTING);
+            if (colorName != null) {
+                try {
+                    color = HighlightColor.valueOf(colorName);
+                } catch (IllegalArgumentException e) {
+                    logging.logToError("Invalid color name in settings: " + colorName);
+                }
+            }
+        } else if (statusCode >= 300) {
+            String colorName = settings.getString(Extension.STATUS_3XX_COLOR_SETTING);
+            if (colorName != null) {
+                try {
+                    color = HighlightColor.valueOf(colorName);
+                } catch (IllegalArgumentException e) {
+                    logging.logToError("Invalid color name in settings: " + colorName);
+                }
+            }
+        }
+
+        // If no status code color was set, check content type
+        if (color == null) {
             MimeType mimeType = responseReceived.inferredMimeType();
             String colorName = null;
             String contentType = responseReceived.headerValue("Content-Type");
@@ -64,23 +86,6 @@ public class RequestColorizer implements HttpHandler {
                     color = HighlightColor.valueOf(colorName);
                 } catch (IllegalArgumentException e) {
                     logging.logToError("Invalid color name in settings: " + colorName);
-                }
-            }
-
-            if (color == null) {
-                String statusCodeColorName = null;
-                if (statusCode >= 400) {
-                    statusCodeColorName = settings.getString(Extension.STATUS_4XX_COLOR_SETTING);
-                } else if (statusCode >= 300) {
-                    statusCodeColorName = settings.getString(Extension.STATUS_3XX_COLOR_SETTING);
-                }
-
-                if (statusCodeColorName != null) {
-                    try {
-                        color = HighlightColor.valueOf(statusCodeColorName);
-                    } catch (IllegalArgumentException e) {
-                        logging.logToError("Invalid color name in settings: " + statusCodeColorName);
-                    }
                 }
             }
         }
