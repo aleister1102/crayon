@@ -1,4 +1,3 @@
-
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.HighlightColor;
 import burp.api.montoya.http.handler.HttpHandler;
@@ -11,7 +10,6 @@ import burp.api.montoya.logging.Logging;
 import burp.api.montoya.ui.settings.SettingsPanelWithData;
 
 public class RequestColorizer implements HttpHandler {
-
     private final SettingsPanelWithData settings;
     private final Logging logging;
 
@@ -72,13 +70,13 @@ public class RequestColorizer implements HttpHandler {
                 if (contentType == null) {
                     contentType = "";
                 }
-
+                
                 if (mimeType == MimeType.JSON || contentType.contains("json")) {
                     colorName = settings.getString(Extension.STATUS_200_GET_JSON_COLOR_SETTING);
                 } else if (mimeType == MimeType.HTML || contentType.contains("html")) {
                     colorName = settings.getString(Extension.STATUS_200_GET_HTML_COLOR_SETTING);
                 }
-
+                
                 // Fallback to general GET color if specific content type color is not set or not applicable
                 if (colorName == null) {
                     colorName = settings.getString(Extension.STATUS_200_GET_COLOR_SETTING);
