@@ -1,5 +1,8 @@
 plugins { id("java") }
 
+group = "org.example"
+version = "0.1.0"
+
 repositories { mavenCentral() }
 
 dependencies { compileOnly("net.portswigger.burp.extensions:montoya-api:2025.6") }

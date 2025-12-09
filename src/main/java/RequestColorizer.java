@@ -1,3 +1,4 @@
+
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.HighlightColor;
 import burp.api.montoya.http.handler.HttpHandler;
@@ -10,6 +11,7 @@ import burp.api.montoya.logging.Logging;
 import burp.api.montoya.ui.settings.SettingsPanelWithData;
 
 public class RequestColorizer implements HttpHandler {
+
     private final SettingsPanelWithData settings;
     private final Logging logging;
 
@@ -53,6 +55,40 @@ public class RequestColorizer implements HttpHandler {
             }
         } else if (statusCode >= 300) {
             String colorName = settings.getString(Extension.STATUS_3XX_COLOR_SETTING);
+            if (colorName != null) {
+                try {
+                    color = HighlightColor.valueOf(colorName);
+                } catch (IllegalArgumentException e) {
+                    logging.logToError("Invalid color name in settings: " + colorName);
+                }
+            }
+        } else if (statusCode >= 200) {
+            String method = responseReceived.initiatingRequest().method();
+            String colorName = null;
+
+            if ("GET".equalsIgnoreCase(method)) {
+                MimeType mimeType = responseReceived.inferredMimeType();
+                String contentType = responseReceived.headerValue("Content-Type");
+                if (contentType == null) {
+                    contentType = "";
+                }
+
+                if (mimeType == MimeType.JSON || contentType.contains("json")) {
+                    colorName = settings.getString(Extension.STATUS_200_GET_JSON_COLOR_SETTING);
+                } else if (mimeType == MimeType.HTML || contentType.contains("html")) {
+                    colorName = settings.getString(Extension.STATUS_200_GET_HTML_COLOR_SETTING);
+                }
+
+                // Fallback to general GET color if specific content type color is not set or not applicable
+                if (colorName == null) {
+                    colorName = settings.getString(Extension.STATUS_200_GET_COLOR_SETTING);
+                }
+            } else if ("POST".equalsIgnoreCase(method)) {
+                colorName = settings.getString(Extension.STATUS_200_POST_COLOR_SETTING);
+            } else {
+                colorName = settings.getString(Extension.STATUS_200_OTHER_COLOR_SETTING);
+            }
+
             if (colorName != null) {
                 try {
                     color = HighlightColor.valueOf(colorName);

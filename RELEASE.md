@@ -13,4 +13,4 @@ This file demonstrates how the new release process works.
 7. Publish release
 8. GitHub Actions will automatically build and attach the JAR file!
 
-## Current version: 1.0.0
+## Current version: 0.1.0
