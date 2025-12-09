@@ -1,16 +1,35 @@
-# Release Demo
+# Release Process
 
-This file demonstrates how the new release process works.
+This project uses a local script to build and publish releases to GitHub.
 
-## Steps to create a release:
+## Prerequisites
+- **GitHub CLI (`gh`)**: Must be installed and authenticated (`gh auth login`).
+- **Java 21**: Required to build the project.
 
-1. Update version in `build.gradle.kts`
-2. Commit and push changes
-3. Go to GitHub Releases page
-4. Click "Create a new release"  
-5. Create a new tag (e.g., v1.0.1)
-6. Fill in release notes
-7. Publish release
-8. GitHub Actions will automatically build and attach the JAR file!
+## Steps to Create a Release
+
+1.  **Update Version**:
+    Open `build.gradle.kts` and update the version number:
+    ```kotlin
+    version = "0.2.0" // Example
+    ```
+
+2.  **Commit Changes**:
+    ```bash
+    git add build.gradle.kts
+    git commit -m "chore: bump version to 0.2.0"
+    ```
+
+3.  **Run Release Script**:
+    Run the `publish_release.sh` script from the project root:
+    ```bash
+    ./publish_release.sh
+    ```
+
+    This script will:
+    - Clean and build the project locally.
+    - Create a git tag (e.g., `v0.2.0`) if it doesn't exist.
+    - Push the tag to GitHub.
+    - Upload the generated JAR file to a new GitHub Release.
 
 ## Current version: 0.1.0

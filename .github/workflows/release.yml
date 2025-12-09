@@ -49,31 +49,9 @@ jobs:
         run: ./gradlew jar
 
       - name: Upload build artifacts (for regular pushes)
-        if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: crayon-jar
           path: build/libs/*.jar
           retention-days: 90
-
-      - name: Create Release (for tag pushes)
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/libs/*.jar
-          name: Release ${{ github.ref_name }}
-          body: |
-            ## Crayon ${{ github.ref_name }}
-
-            A Burp Suite extension that automatically colorizes request/response entries.
-
-            ### Installation
-            1. Download the `Crayon-*.jar` file
-            2. In Burp Suite, go to Extensions > Add
-            3. Select the downloaded JAR file
-
-            ### Changes
-            See the commit history for detailed changes in this release.
-          draft: false
-          prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}
