@@ -1,4 +1,3 @@
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +24,8 @@ public class Extension implements BurpExtension {
     public static final String STATUS_200_GET_HTML_COLOR_SETTING = "200 GET HTML Color";
     public static final String STATUS_200_POST_COLOR_SETTING = "200 POST Color";
     public static final String STATUS_200_OTHER_COLOR_SETTING = "200 Other Methods Color";
+    public static final String WEBSOCKET_INCOMING_COLOR_SETTING = "WebSocket Incoming Color";
+    public static final String WEBSOCKET_OUTGOING_COLOR_SETTING = "WebSocket Outgoing Color";
     public static final String LOG_ENABLED_SETTING = "Enable logging";
 
     @Override
@@ -63,11 +64,25 @@ public class Extension implements BurpExtension {
                                 HighlightColor.BLUE.name()),
                         SettingsPanelSetting.listSetting(STATUS_200_OTHER_COLOR_SETTING, colorNames,
                                 HighlightColor.PINK.name()),
+                        SettingsPanelSetting.listSetting(WEBSOCKET_INCOMING_COLOR_SETTING, colorNames,
+                                HighlightColor.GREEN.name()),
+                        SettingsPanelSetting.listSetting(WEBSOCKET_OUTGOING_COLOR_SETTING, colorNames,
+                                HighlightColor.YELLOW.name()),
                         SettingsPanelSetting.booleanSetting(LOG_ENABLED_SETTING, false))
                 .build();
 
         montoyaApi.userInterface().registerSettingsPanel(settingsPanel);
 
+        // Register HTTP handler for Proxy, Intruder, Logger, and Target
         montoyaApi.http().registerHttpHandler(new RequestColorizer(montoyaApi, settingsPanel));
+
+        // Register WebSocket handler for Proxy WebSockets
+        montoyaApi.proxy().registerWebSocketCreationHandler(new ProxyWebSocketColorizer(montoyaApi, settingsPanel));
+
+        // Register WebSocket handler for all tools (Target, Repeater, etc.)
+        montoyaApi.websockets().registerWebSocketCreatedHandler(new WebSocketColorizer(montoyaApi, settingsPanel));
+
+        // Register context menu for manual highlighting
+        montoyaApi.userInterface().registerContextMenuItemsProvider(new CrayonContextMenu(montoyaApi, settingsPanel));
     }
 }

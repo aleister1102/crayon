@@ -2,29 +2,48 @@
 
 ![Build and Release](https://github.com/aleister1102/crayon/workflows/Build%20and%20Release/badge.svg)
 
-A Burp Suite extension that automatically colorizes request/response entries in the Proxy history and other tools, making it easier to spot interesting items at a glance.
+A Burp Suite extension that automatically colorizes request/response entries in the Proxy history, Target, Logger, Intruder, and WebSocket traffic, making it easier to spot interesting items at a glance.
 
 ## Features
 
 Crayon uses a set of predefined and configurable rules to apply highlight colors:
 
-**Requests:**
-*   `POST`, `PUT`, `PATCH`: Yellow
-*   `DELETE`: Red
-
-**Responses (by Status Code):**
+**HTTP Responses (by Status Code):**
 *   **5xx Server Error:** Red
 *   **4xx Client Error:** Orange
 *   **3xx Redirection:** Yellow
 
-**Responses (by Content-Type for 2xx Status):**
+**HTTP Responses (by Content-Type for 2xx Status):**
 *   **JSON:** Green (Configurable)
 *   **XML:** Blue (Configurable)
-*   **HTML:** Magenta (Configurable)
+*   **HTML:** Cyan (Configurable)
+
+**WebSocket Messages:**
+*   **Incoming (Server to Client):** Green (Configurable)
+*   **Outgoing (Client to Server):** Yellow (Configurable)
+
+**Context Menu:**
+*   Right-click on any request/response to access the "Crayon" menu
+*   **Auto-highlight:** Apply highlighting rules to selected items
+*   **Set color:** Manually set any highlight color
+*   **Clear highlight:** Remove highlighting from selected items
+
+**Site Map Context Menu (additional options):**
+*   **Auto-highlight URL prefix:** Apply rules to all items sharing the same URL prefix
+*   **Set color for URL prefix:** Apply a color to all items under the same path
+*   **Clear highlight for URL prefix:** Remove highlighting from all items under the same path
+
+## Supported Tools
+
+*   Proxy
+*   Target
+*   Logger
+*   Intruder
+*   WebSocket History
 
 ## Configuration
 
-You can customize the colors for different content types and enable/disable logging via the "Crayon Settings" panel in the Burp Suite **Settings** dialog.
+You can customize the colors for different content types, status codes, WebSocket directions, and enable/disable logging via the "Crayon Settings" panel in the Burp Suite **Settings** dialog.
 
 ## Installation
 
