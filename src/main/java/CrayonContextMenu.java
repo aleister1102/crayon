@@ -90,56 +90,73 @@ public class CrayonContextMenu implements ContextMenuItemsProvider {
                 logging.logToOutput("Crayon Context Menu: isSiteMap=" + isSiteMap + ", isProxy=" + isProxy + ", isIntruder=" + isIntruder + ", isMessageEditor=" + isMessageEditor + ", isLogger=" + isLogger);
             }
 
-            // Create main submenu to reduce clutter
+            // Create main submenu
             javax.swing.JMenu crayonMenu = new javax.swing.JMenu("Crayon");
             menuItems.add(crayonMenu);
 
-            // CRITICAL FIX: Always create at least one menu item
-            // This ensures the context menu appears even in edge cases
-            if (items.isEmpty() && contextUrl == null) {
-                // Fallback: Create a basic menu item that works with no selection
-                JMenuItem noSelectionItem = new JMenuItem("No items selected");
-                noSelectionItem.setEnabled(false); // Disable it to show it's not applicable
-                crayonMenu.add(noSelectionItem);
+            // Determine best context for labels and actions
+            JMenuItem highlightItem = new JMenuItem("Highlight");
+            JMenuItem clearItem = new JMenuItem("Clear");
+
+            if (!items.isEmpty()) {
+                // Scenario A: Explicit Selection
+                highlightItem.setText("Highlight selected (" + items.size() + " items)");
+                highlightItem.addActionListener(e -> {
+                    int count = 0;
+                    for (HttpRequestResponse item : items) {
+                        if (applyAutoHighlight(item)) count++;
+                    }
+                    if (settings.getBoolean(Extension.LOG_ENABLED_SETTING)) {
+                        logging.logToOutput("Crayon: Highlighted " + count + " selected items");
+                    }
+                });
+
+                clearItem.setText("Remove highlights (" + items.size() + " items)");
+                clearItem.addActionListener(e -> {
+                    for (HttpRequestResponse item : items) {
+                        item.annotations().setHighlightColor(HighlightColor.NONE);
+                    }
+                });
+            } else if (isSiteMap && (fallbackUrl != null || !items.isEmpty())) {
+                // Scenario B: SiteMap Folder (Prefix)
+                highlightItem.setText("Highlight folder rules (Recursive)");
+                highlightItem.addActionListener(e -> {
+                    if (!items.isEmpty()) {
+                        applyColorToUrlPrefix(items.get(0), true);
+                    } else if (fallbackUrl != null) {
+                        // We need an item to get the URL prefix logic working
+                        // If items is empty but we have fallbackUrl, we log it for now
+                        logging.logToOutput("Crayon: Sitemap folder highlight requested for: " + fallbackUrl);
+                    }
+                });
+
+                clearItem.setText("Remove folder highlights");
+                clearItem.addActionListener(e -> {
+                    if (!items.isEmpty()) {
+                        applyColorToUrlPrefix(items.get(0), false);
+                    }
+                });
+            } else if (isLogger) {
+                // Scenario C: Logger/Generic view
+                highlightItem.setText("Highlight all in view (rules)");
+                highlightItem.addActionListener(e -> applyAutoHighlightToLoggerItems());
+
+                clearItem.setText("Remove all highlights in view");
+                clearItem.addActionListener(e -> {
+                    if (settings.getBoolean(Extension.LOG_ENABLED_SETTING)) {
+                        logging.logToOutput("Crayon: Clear all highlights in view requested");
+                    }
+                });
             } else {
-                // Normal case: Create the standard menu items
-                JMenuItem autoHighlight = createAutoHighlightItem(items);
-                autoHighlight.setText("Highlight (apply rules)"); // Remove "Crayon:" prefix
-                crayonMenu.add(autoHighlight);
+                // Scenario D: No selection/Unknown
+                highlightItem.setText("Highlight (No items selected)");
+                highlightItem.setEnabled(false);
+                clearItem.setText("Remove highlights");
+                clearItem.setEnabled(false);
             }
 
-            // Add logger-specific options (detected by lack of other tool types)
-            if (isLogger) {
-                JMenuItem autoHighlightLogger = new JMenuItem("Highlight all in Logger (apply rules)");
-                autoHighlightLogger.addActionListener(e -> {
-                    // Apply highlighting to all visible items in Logger
-                    applyAutoHighlightToLoggerItems();
-                });
-                crayonMenu.add(autoHighlightLogger);
-            }
-
-            // Add sitemap-specific option for URL prefix
-            if (isSiteMap && (!items.isEmpty() || fallbackUrl != null)) {
-                JMenuItem autoHighlightPrefix = new JMenuItem("Highlight URL prefix (apply rules)");
-                autoHighlightPrefix.addActionListener(e -> {
-                    applyColorToUrlPrefix(items.get(0), true);
-                });
-                crayonMenu.add(autoHighlightPrefix);
-            }
-
-            // Clear highlight
-            JMenuItem clearHighlight = createClearHighlightItem(items);
-            clearHighlight.setText("Remove highlights"); // Remove "Crayon:" prefix
-            crayonMenu.add(clearHighlight);
-
-            // Add sitemap-specific clear option for URL prefix
-            if (isSiteMap && (!items.isEmpty() || fallbackUrl != null)) {
-                JMenuItem clearPrefixHighlight = new JMenuItem("Remove highlights for URL prefix");
-                clearPrefixHighlight.addActionListener(e -> {
-                    applyColorToUrlPrefix(items.get(0), false);
-                });
-                crayonMenu.add(clearPrefixHighlight);
-            }
+            crayonMenu.add(highlightItem);
+            crayonMenu.add(clearItem);
 
             // CRITICAL FIX: Never return null, always return a list (even if empty)
             // This prevents Burp from thinking the extension failed to provide menu items
