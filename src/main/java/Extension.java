@@ -27,6 +27,7 @@ public class Extension implements BurpExtension {
     public static final String WEBSOCKET_INCOMING_COLOR_SETTING = "WebSocket Incoming Color";
     public static final String WEBSOCKET_OUTGOING_COLOR_SETTING = "WebSocket Outgoing Color";
     public static final String LOG_ENABLED_SETTING = "Enable logging";
+    public static final String DEBUG_MODE_SETTING = "Enable debug mode (verbose logging)";
 
     @Override
     public void initialize(MontoyaApi montoyaApi) {
@@ -68,7 +69,8 @@ public class Extension implements BurpExtension {
                                 HighlightColor.GREEN.name()),
                         SettingsPanelSetting.listSetting(WEBSOCKET_OUTGOING_COLOR_SETTING, colorNames,
                                 HighlightColor.YELLOW.name()),
-                        SettingsPanelSetting.booleanSetting(LOG_ENABLED_SETTING, false))
+                        SettingsPanelSetting.booleanSetting(LOG_ENABLED_SETTING, false),
+                        SettingsPanelSetting.booleanSetting(DEBUG_MODE_SETTING, false))
                 .build();
 
         montoyaApi.userInterface().registerSettingsPanel(settingsPanel);
